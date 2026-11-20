@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.3](https://github.com/kazeburo/ishikaridc-workshop-app/compare/v0.0.2...v0.0.3) - 2026-11-20
+
+- feat: improve user experience for monitoring and image processing fea… by @kazeburo in https://github.com/kazeburo/ishikaridc-workshop-app/pull/6
+
 ## [v0.0.2](https://github.com/kazeburo/ishikaridc-workshop-app/compare/v0.0.1...v0.0.2) - 2026-11-11
 
 - feat: add .gitignore, update README, modify go.mod, enhance app.js an… by @kazeburo in https://github.com/kazeburo/ishikaridc-workshop-app/pull/4
