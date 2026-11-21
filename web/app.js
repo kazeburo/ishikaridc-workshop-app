@@ -108,9 +108,29 @@ if (!navigator.mediaDevices?.getUserMedia) {
 $('camera').onclick=async()=>{closeCamera();if(!navigator.mediaDevices?.getUserMedia){message('この接続ではカメラを使えません。お手本・背景やお絵かきが使えます。カメラにはHTTPSまたはlocalhost接続が必要です。',true);return}try{stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:640}},audio:false});$('video').srcObject=stream;$('cameraBox').hidden=false}catch{message('カメラを開けません。利用許可やカメラの接続を確認してください。お手本・背景やお絵かきも使えます。',true)}};
 $('closeCamera').onclick=closeCamera;$('capture').onclick=()=>{const v=$('video');if(!v.videoWidth){message('カメラの準備ができるまでお待ちください。',true);return}place(v,v.videoWidth,v.videoHeight);closeCamera()};window.addEventListener('pagehide',closeCamera);
 function mode(){return document.querySelector('input[name=mode]:checked').value}
-for(const radio of document.querySelectorAll('[name=mode]'))radio.onchange=()=>{const mosaic=mode()==='mosaic';$('amountLabel').textContent=mosaic?'タイルの大きさ':'もようの数';$('amount').min=mosaic?4:3;$('amount').max=mosaic?64:16;$('amount').value=mosaic?16:8;$('amountValue').textContent=$('amount').value};
+const filterControls = {
+  kaleidoscope: {label: 'もようの数', min: 3, max: 16, value: 8},
+  mosaic: {label: 'タイルの大きさ', min: 4, max: 64, value: 16},
+  stainedglass: {label: 'ガラスの大きさ', min: 12, max: 96, value: 40}
+};
+for (const radio of document.querySelectorAll('[name=mode]')) {
+  radio.onchange = () => {
+    const settings = filterControls[mode()];
+    $('amountLabel').textContent = settings.label;
+    $('amount').min = settings.min;
+    $('amount').max = settings.max;
+    $('amount').value = settings.value;
+    $('amountValue').textContent = settings.value;
+  };
+}
 $('amount').oninput=()=>{$('amountValue').textContent=$('amount').value};
+const healthHistory = [];
+let healthChecking = false;
+
 async function health() {
+  if (healthChecking) return;
+  healthChecking = true;
+  const started = performance.now();
   let connected = false;
   try {
     const response = await fetch('/api/health', {
@@ -121,6 +141,21 @@ async function health() {
   } catch {
     connected = false;
   }
+  healthChecking = false;
+  const elapsed = Math.round(performance.now() - started);
+  healthHistory.push(connected ? elapsed : null);
+  if (healthHistory.length > 24) healthHistory.shift();
+  $('healthLatency').textContent = connected ? elapsed + ' ms' : '応答なし';
+  $('healthGraph').replaceChildren(...healthHistory.map(value => {
+    const bar = document.createElement('span');
+    bar.className = value === null ? 'failed' : 'received';
+    bar.style.height = value === null ? '100%' : Math.max(8, Math.min(100, value / 500 * 100)) + '%';
+    bar.title = value === null ? '接続できませんでした' : value + ' ms';
+    return bar;
+  }));
+  $('healthGraph').setAttribute('aria-label',
+    '直近' + healthHistory.length + '回の接続確認。赤は接続失敗。応答時間は最大500ミリ秒の目盛り。最新は' +
+    (connected ? elapsed + 'ミリ秒' : '接続失敗'));
   const state = connected ? 'ok' : 'off';
   // Update only on a state change so polling does not restart the alert animation.
   if ($('health').className === state) return;

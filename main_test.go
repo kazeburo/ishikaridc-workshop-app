@@ -40,7 +40,7 @@ func TestTransform(t *testing.T) {
 	src.Set(20, 10, color.RGBA{R: 255, A: 255})
 	var buf bytes.Buffer
 	png.Encode(&buf, src)
-	for _, mode := range []string{"mosaic", "kaleidoscope"} {
+	for _, mode := range []string{"mosaic", "kaleidoscope", "stainedglass"} {
 		t.Run(mode, func(t *testing.T) {
 			r := httptest.NewRequest("POST", "/api/transform?mode="+mode+"&amount=8", bytes.NewReader(buf.Bytes()))
 			w := httptest.NewRecorder()
@@ -86,6 +86,41 @@ func TestKaleidoscopeUniform(t *testing.T) {
 		for x := 0; x < 5; x++ {
 			if out.At(x, y) != want {
 				t.Fatal(out.At(x, y))
+			}
+		}
+	}
+}
+
+func TestStainedGlassPanes(t *testing.T) {
+	src := image.NewNRGBA(image.Rect(3, 5, 28, 22))
+	red := color.NRGBA{220, 70, 40, 255}
+	blue := color.NRGBA{40, 90, 220, 255}
+	for y := 0; y < 17; y++ {
+		for x := 0; x < 25; x++ {
+			c := red
+			if x > y {
+				c = blue
+			}
+			src.SetNRGBA(x+3, y+5, c)
+		}
+	}
+	out := stainedGlass(src, 16).(*image.RGBA)
+	if out.Bounds() != image.Rect(0, 0, 25, 17) {
+		t.Fatal(out.Bounds())
+	}
+	if got := out.RGBAAt(3, 10); got.R != red.R || got.B != red.B {
+		t.Fatalf("red pane: %v", got)
+	}
+	if got := out.RGBAAt(10, 3); got.R != blue.R || got.B != blue.B {
+		t.Fatalf("blue pane: %v", got)
+	}
+	if got := out.RGBAAt(8, 8); got != (color.RGBA{37, 41, 53, 255}) {
+		t.Fatalf("lead seam: %v", got)
+	}
+	for y := 0; y < 17; y++ {
+		for x := 0; x < 25; x++ {
+			if out.RGBAAt(x, y).A != 255 {
+				t.Fatalf("unpainted pixel at %d,%d", x, y)
 			}
 		}
 	}
