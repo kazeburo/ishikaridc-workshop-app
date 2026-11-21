@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.4](https://github.com/kazeburo/ishikaridc-workshop-app/compare/v0.0.3...v0.0.4) - 2026-11-21
+
+- feat: add stained glass mode and enhance server health monitoring UI by @kazeburo in https://github.com/kazeburo/ishikaridc-workshop-app/pull/8
+
 ## [v0.0.3](https://github.com/kazeburo/ishikaridc-workshop-app/compare/v0.0.2...v0.0.3) - 2026-11-20
 
 - feat: improve user experience for monitoring and image processing fea… by @kazeburo in https://github.com/kazeburo/ishikaridc-workshop-app/pull/6
