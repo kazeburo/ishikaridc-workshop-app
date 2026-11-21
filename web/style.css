@@ -3,46 +3,62 @@
 #preset{font:inherit;color:inherit;background:#fff;border:1px solid #d4ddeb;border-radius:10px;padding:9px;max-width:100%}
 
 #health {
+  width: 410px;
+  max-width: 100%;
+  flex-shrink: 0;
+  padding: 18px 22px;
+  border: 2px solid #46505e;
+  border-radius: 14px;
+  background: #20262f;
+  color: #e9edf4;
+  white-space: normal;
+  box-shadow: 0 8px 22px #10182020;
+}
+.monitor-heading, .monitor-metric, .monitor-legend {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: 21px;
-  padding: 22px 26px;
-  border: 3px solid #b7c7d9;
-  border-radius: 18px;
-  white-space: normal;
-  flex-shrink: 0;
-  max-width: 100%;
+  justify-content: space-between;
+  gap: 12px;
 }
-#health.ok { background: #e7f5ee; border-color: #39976b; color: #216a49; }
+.monitor-heading { font: 11px ui-monospace, monospace; color: #aab7c9; letter-spacing: .06em; }
+.monitor-status { display: flex; align-items: center; gap: 12px; margin: 16px 0; font-size: 20px; }
 #healthIcon {
   display: inline-grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border-radius: 50%;
   background: #66788d;
   color: white;
-  font-size: 30px;
+  font-size: 27px;
   line-height: 1;
 }
+#health.ok { border-color: #39976b; }
 #health.ok #healthIcon { background: #39976b; }
-#health.off {
-  border-color: #ef3d56;
-  background: #fff0f2;
-  color: #d92543;
-  animation: connection-alert 1.6s ease-in-out infinite;
-}
+#health.ok #healthText { color: #87e0b0; }
+#health.off { border-color: #ef3d56; animation: connection-alert 1.6s ease-in-out infinite; }
 #health.off #healthIcon { background: #ef3d56; }
-@keyframes connection-alert {
-  50% {
-    background: #ffdce2;
-    border-color: #ff6068;
-    box-shadow: 0 0 0 7px #ef3d5626;
-  }
+#health.off #healthText, #health.off #healthLatency { color: #ff8294; }
+.monitor-metric { color: #b8c5d7; font-size: 12px; }
+#healthLatency { font: bold 19px ui-monospace, monospace; color: #e9edf4; }
+#healthGraph {
+  height: 44px;
+  margin-top: 9px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  border-bottom: 1px solid #566170;
+  background: repeating-linear-gradient(to top, transparent 0 13px, #ffffff0c 13px 14px);
 }
-@media(max-width:780px) { #health { display: flex; font-size: 18px; padding: 18px; } }
+#healthGraph span { width: calc((100% - 92px) / 24); border-radius: 2px 2px 0 0; flex-shrink: 0; }
+#healthGraph .received { background: #66cca0; }
+#healthGraph .failed { background: #ef3d56; }
+.monitor-legend { margin-top: 6px; font-size: 10px; color: #aab7c9; }
+@keyframes connection-alert {
+  50% { background: #382630; border-color: #ff6068; box-shadow: 0 0 0 6px #ef3d5626; }
+}
+@media(max-width:780px) { #health { margin-top: 16px; } .monitor-status { font-size: 18px; } }
 .result { position: relative; }
 #processing {
   position: absolute;
@@ -98,3 +114,59 @@
 }
 #camera:disabled { cursor: not-allowed; }
 .camera-tools .hint { margin-bottom: 0; }
+
+.modes { flex-wrap: wrap; }
+.modes label { flex: 1 1 135px; }
+
+.modes {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 10px;
+}
+.modes label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  background: #f3f5fb;
+  font-size: clamp(12px, 1.1vw, 15px);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.modes input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #506dde;
+}
+.modes label:has(input:checked) {
+  border-color: #506dde;
+  background: #edf0ff;
+  color: #344cb0;
+}
+.modes label:focus-within {
+  outline: 2px solid #506dde;
+  outline-offset: 3px;
+}
+.amount {
+  display: grid;
+  grid-template-columns: max-content minmax(60px, 1fr) 3ch;
+  gap: 14px;
+  padding: 14px 0;
+  font-size: 15px;
+}
+.amount input[type=range] {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+.amount output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}

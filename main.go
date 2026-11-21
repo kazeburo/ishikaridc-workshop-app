@@ -59,7 +59,7 @@ func transform(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	mode := r.URL.Query().Get("mode")
-	if mode != "mosaic" && mode != "kaleidoscope" {
+	if mode != "mosaic" && mode != "kaleidoscope" && mode != "stainedglass" {
 		http.Error(w, "変換方法が不正です", 400)
 		return
 	}
@@ -78,6 +78,9 @@ func transform(w http.ResponseWriter, r *http.Request) {
 			amount = 64
 		}
 		dst = mosaic(src, amount)
+	} else if mode == "stainedglass" {
+		amount = max(12, min(96, amount))
+		dst = stainedGlass(src, amount)
 	} else {
 		if amount < 3 {
 			amount = 3
@@ -181,4 +184,67 @@ func reflectIndex(v, n int) int {
 		v = p - v
 	}
 	return v
+}
+
+// stainedGlass averages the two triangular panes in each cell.
+// Alternating diagonals create a patchwork with dark lead seams.
+func stainedGlass(src image.Image, size int) image.Image {
+	bounds := src.Bounds()
+	dst := image.NewRGBA(image.Rect(0, 0, bounds.Dx(), bounds.Dy()))
+	lead := color.RGBA{R: 37, G: 41, B: 53, A: 255}
+	seam := math.Max(1, float64(size)/24)
+	for top := 0; top < bounds.Dy(); top += size {
+		for left := 0; left < bounds.Dx(); left += size {
+			width := min(size, bounds.Dx()-left)
+			height := min(size, bounds.Dy()-top)
+			reverse := (left/size+top/size)%2 == 1
+			// Coordinates are measured at pixel centers, including partial edge cells.
+			diagonal := func(x, y int) float64 {
+				px := float64(x) + 0.5
+				if reverse {
+					px = float64(width) - px
+				}
+				return (px*float64(height) - (float64(y)+0.5)*float64(width)) /
+					math.Hypot(float64(width), float64(height))
+			}
+			var sums [2][3]uint64
+			var counts [2]uint64
+			for y := 0; y < height; y++ {
+				for x := 0; x < width; x++ {
+					pane := 0
+					if diagonal(x, y) > 0 {
+						pane = 1
+					}
+					c := color.NRGBAModel.Convert(src.At(bounds.Min.X+left+x, bounds.Min.Y+top+y)).(color.NRGBA)
+					alpha := uint64(c.A)
+					for channel, value := range [3]uint8{c.R, c.G, c.B} {
+						sums[pane][channel] += (uint64(value)*alpha + 255*(255-alpha)) / 255
+					}
+					counts[pane]++
+				}
+			}
+			var colors [2]color.RGBA
+			for pane := range colors {
+				count := max(uint64(1), counts[pane])
+				colors[pane] = color.RGBA{uint8(sums[pane][0] / count), uint8(sums[pane][1] / count), uint8(sums[pane][2] / count), 255}
+			}
+			for y := 0; y < height; y++ {
+				for x := 0; x < width; x++ {
+					distance := diagonal(x, y)
+					pane := 0
+					if distance > 0 {
+						pane = 1
+					}
+					c := colors[pane]
+					if math.Abs(distance) < seam/2 ||
+						float64(x)+0.5 < seam/2 || float64(y)+0.5 < seam/2 ||
+						float64(width-x)-0.5 < seam/2 || float64(height-y)-0.5 < seam/2 {
+						c = lead
+					}
+					dst.SetRGBA(left+x, top+y, c)
+				}
+			}
+		}
+	}
+	return dst
 }

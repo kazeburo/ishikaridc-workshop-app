@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>くるくる画像工房</title><link rel="stylesheet" href="style.css"></head>
-<body><header><div><span class="tag">データセンターのおしごと体験</span><h1>くるくる画像工房</h1><p>描いて、送って、変身！ サーバに画像をつくってもらおう。</p></div><div id="health" role="status" aria-live="polite" aria-atomic="true"><span id="healthIcon" aria-hidden="true">…</span><span id="healthText">サーバを確認中…</span></div></header>
+<body><header><div><span class="tag">データセンターのおしごと体験</span><h1>くるくる画像工房</h1><p>描いて、送って、変身！ サーバに画像をつくってもらおう。</p></div><div id="health">
+<div class="monitor-heading"><span>SERVER MONITOR</span><span>4秒ごとに確認</span></div>
+<div class="monitor-status" role="status" aria-live="polite" aria-atomic="true"><span id="healthIcon" aria-hidden="true">…</span><span id="healthText">サーバを確認中…</span></div>
+<div class="monitor-metric"><span>応答時間</span><strong id="healthLatency">—</strong></div>
+<div id="healthGraph" role="img" aria-label="接続確認の履歴。まだ記録がありません"></div>
+<div class="monitor-legend"><span>← 過去の接続確認</span><span>最新 →</span></div>
+</div></header>
 <main><section class="panel"><h2><span>1</span> もとになる画像をつくろう</h2><div class="tools">
 <label for="preset">お手本・背景</label>
 <select id="preset">
@@ -21,7 +27,7 @@
 <button id="camera" aria-describedby="cameraHint">カメラをつかう</button>
 <p id="cameraHint" class="hint">カメラが使える環境では、撮った写真にも絵を描けます。</p>
 </div><div id="cameraBox" hidden><video id="video" autoplay playsinline muted></video><div class="tools"><button id="capture">この写真をつかう</button><button id="closeCamera">カメラを閉じる</button></div></div></section>
-<section class="panel"><h2><span>2</span> サーバで変身させよう</h2><div class="modes"><label><input type="radio" name="mode" value="kaleidoscope" checked> 万華鏡</label><label><input type="radio" name="mode" value="mosaic"> モザイクタイル</label></div><label class="amount"><span id="amountLabel">もようの数</span><input id="amount" type="range" min="3" max="16" value="8"><output id="amountValue">8</output></label><button class="primary" id="convert">サーバに送って変身！</button><p id="message" role="status" aria-live="polite">画像を送ると、サーバが計算して結果を返してくれます。</p><div class="result" id="resultBox" aria-busy="false">
+<section class="panel"><h2><span>2</span> サーバで変身させよう</h2><div class="modes"><label><input type="radio" name="mode" value="kaleidoscope" checked> 万華鏡</label><label><input type="radio" name="mode" value="mosaic"> モザイクタイル</label><label><input type="radio" name="mode" value="stainedglass"> ステンドグラス</label></div><label class="amount"><span id="amountLabel">もようの数</span><input id="amount" type="range" min="3" max="16" value="8"><output id="amountValue">8</output></label><button class="primary" id="convert">サーバに送って変身！</button><p id="message" role="status" aria-live="polite">画像を送ると、サーバが計算して結果を返してくれます。</p><div class="result" id="resultBox" aria-busy="false">
 <div id="processing" hidden>
 <div class="transfer" aria-hidden="true"><span>PC</span><i></i><div class="server-rack"><b></b><b></b><b></b></div></div>
 <strong id="processingTitle">サーバへ画像を送っています</strong>
